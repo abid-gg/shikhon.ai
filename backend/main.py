@@ -5,7 +5,15 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import health_router, questions_router
+from routers import (
+    health_router,
+    questions_router,
+    auth_router,
+    exams_router,
+    sessions_router,
+    documents_router,
+    analytics_router,
+)
 
 load_dotenv()
 
@@ -29,6 +37,11 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(questions_router)
+app.include_router(auth_router)
+app.include_router(exams_router)
+app.include_router(sessions_router)
+app.include_router(documents_router)
+app.include_router(analytics_router)
 
 
 @app.get("/")

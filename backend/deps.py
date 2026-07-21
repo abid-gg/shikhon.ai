@@ -81,8 +81,67 @@ def get_llm_model() -> str:
     return os.getenv("LLM_MODEL", "openrouter/free").strip()
 
 
+from fastapi import HTTPException, Header
+from typing import Optional
+import jwt
+from datetime import datetime
+
+
+async def get_current_user(
+    supabase: "SupabaseDep",
+    authorization: Optional[str] = Header(None),
+) -> dict[str, Any]:
+    """Extract and verify JWT token from Authorization header."""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing authorization header")
+    
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(status_code=401, detail="Invalid authentication scheme")
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+    
+    try:
+        # Verify token with Supabase
+        user = supabase.auth.get_user(token)
+        
+        # Fetch user profile from our users table
+        profile = (
+            supabase.table("users")
+            .select("*")
+            .eq("id", user.user.id)
+            .single()
+            .execute()
+        )
+        
+        return {
+            **profile.data,
+            "auth_id": user.user.id,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+async def require_teacher(user: dict = Depends(get_current_user)) -> dict:
+    """Ensure user is a teacher."""
+    if user.get("role") != "teacher":
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    return user
+
+
+async def require_student(user: dict = Depends(get_current_user)) -> dict:
+    """Ensure user is a student."""
+    if user.get("role") != "student":
+        raise HTTPException(status_code=403, detail="Student access required")
+    return user
+
+
 SupabaseDep = Annotated[Client, Depends(get_supabase_client)]
 EmbedderDep = Annotated[Any, Depends(get_embedding_model)]
 LLMKeyDep = Annotated[str, Depends(get_llm_api_key)]
 LLMBaseUrlDep = Annotated[str, Depends(get_llm_base_url)]
 LLMModelDep = Annotated[str, Depends(get_llm_model)]
+CurrentUserDep = Annotated[dict, Depends(get_current_user)]
+TeacherDep = Annotated[dict, Depends(require_teacher)]
+StudentDep = Annotated[dict, Depends(require_student)]
