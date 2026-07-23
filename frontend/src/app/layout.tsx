@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Inter, Noto_Sans_Bengali } from "next/font/google";
+import { Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "react-hot-toast";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const bengali = Noto_Sans_Bengali({
   subsets: ["bengali"],
   variable: "--font-bengali",
@@ -35,16 +34,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", inter.variable, bengali.variable)}>
-      <head>
-        <style>{`
-          .bangla-text {
-            font-family: var(--font-bengali), 'Noto Sans Bengali', sans-serif;
-          }
-        `}</style>
-      </head>
+    <html lang="en" className={cn("font-sans", geistSans.variable, bengali.variable)}>
       <body
-        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+  className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
         <Toaster position="top-right" />

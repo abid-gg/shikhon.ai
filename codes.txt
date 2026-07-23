@@ -1,0 +1,14 @@
+Start the Backend
+
+cd E:\Final_year_project\shikhon.ai\backend
+.\venv\Scripts\Activate.ps1
+uvicorn main:app --reload
+
+backend running on: http://127.0.0.1:8000/docs
+
+Start the Frontend
+
+cd E:\Final_year_project\shikhon.ai\frontend
+npm run dev
+
+frontend running on: http://localhost:3000/
